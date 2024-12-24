@@ -93,7 +93,6 @@ O EFS é um sistema de arquivos escalável e elástico que permite que várias i
 
    # Monta o sistema de arquivos da Amazon EFS
    sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport <id-amazon>:/ /mnt/efs
-bash```
 
 ## Criação das EC2
 Para este projeto, criamos duas instâncias EC2.
@@ -151,4 +150,3 @@ Para acessar as instâncias privadas via SSH, configuramos um Bastion Host em um
 3. **A partir do Bastion Host, acessar as instâncias privadas utilizando o comando:**
    ```bash
    ssh -i "mykeys.pem" ubuntu@<ip-privado>
-bash```
