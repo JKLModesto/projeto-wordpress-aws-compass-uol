@@ -12,7 +12,7 @@ Na primeira etapa, foi necessário criar uma nova VPC para organizar os recursos
 ### Sobre o Gateway NAT
 O Gateway NAT (Network Address Translation) permite que as instâncias em sub-redes privadas acessem a internet para realizar atualizações e outras tarefas, sem expor essas instâncias diretamente à internet.
 
-**Imagem sugerida:** Diagrama mostrando a VPC, as sub-redes públicas/privadas e o Gateway NAT.
+![Configuração do Load Balancer](imgs/criando-vpc.png "Configuração da VPC")
 
 ---
 
