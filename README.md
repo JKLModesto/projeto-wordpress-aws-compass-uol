@@ -12,7 +12,7 @@ Na primeira etapa, foi necessário criar uma nova VPC para organizar os recursos
 ### Sobre o Gateway NAT
 O Gateway NAT (Network Address Translation) permite que as instâncias em sub-redes privadas acessem a internet para realizar atualizações e outras tarefas, sem expor essas instâncias diretamente à internet.
 
-![Configuração do Load Balancer](imgs/criando-vpc.png "Configuração da VPC")
+![Configuração da VPC](imgs/criando-vpc.png "Configuração da VPC")
 
 ---
 
@@ -32,6 +32,9 @@ Após criar a VPC, seguimos para a configuração dos Grupos de Segurança, que 
    - Tipo: NFS -> Origem: MyGroup-ec2
 
 **Nota:** É necessário criar o grupo de regras da EC2 antes de configurar o grupo do RDS, pois o RDS depende das regras da EC2 para definir a origem de conexão MySQL.
+![Configuração do Grupo de segurança da EC2](imgs/grupo-ec2.png "Configuração do Grupo de segurança da EC2")
+
+![Configuração do Grupo de segurança do RDS](imgs/grupo-rds.png "Configuração do Grupo de segurança do RDS")
 
 ---
 
@@ -48,6 +51,8 @@ Após criar a VPC, seguimos para a configuração dos Grupos de Segurança, que 
    - **VPC:** Selecione a VPC previamente criada para o projeto.
 4. **Selecionar apenas sub-redes privadas.**
 5. **Salvar o grupo:** Clique em "Criar grupo".
+
+![Configuração do Grupo de sub-rede do RDS](imgs/grupo-subrede-rds.png "Configuração do Grupo de sub-rede do RDS")
 
 ### Configurações principais do RDS
 - **Tipo de banco de dados:** MySQL (Nível gratuito).
@@ -67,7 +72,7 @@ Após criar a VPC, seguimos para a configuração dos Grupos de Segurança, que 
 - **Nome do banco de dados:** `wordpress`
 - **Escalabilidade automática do armazenamento:** Desmarcar.
 
-**Imagem sugerida:** Tela de configuração do RDS destacando os campos preenchidos.
+![Configuração DB do RDS](imgs/criando-db-rds.png "Configuração DB do RDS")
 
 ---
 
@@ -122,10 +127,16 @@ O Load Balancer distribui o tráfego de forma equilibrada entre as instâncias.
 - **Mapeamento de rede:** Sub-redes públicas.
 - **Grupo de segurança:** `MyGroup-loadbalancer`.
 
+![Configuração da rede loadbalancer](imgs/loadbalancer-rede.png "Configuração da rede loadbalancer")
+
 ### Verificação de integridade:
 - **Caminho de ping:** `/wp-admin/install.php` (espera-se retorno com status 200).
 
-Após configurado, o Load Balancer gera um DNS que pode ser utilizado para acessar o ambiente.
+### Integrar as instâncias:
+- **Clicar em ->** Adicionar instâncias.
+- Selecionar as duas instâncias que criamos anteriormente.
+
+Após configurado, o Load Balancer gera um DNS que pode ser utilizado para acessar o ambiente wordpress, indepedente da instância.
 
 ---
 
@@ -150,3 +161,4 @@ Para acessar as instâncias privadas via SSH, configuramos um Bastion Host em um
 3. **A partir do Bastion Host, acessar as instâncias privadas utilizando o comando:**
    ```bash
    ssh -i "mykeys.pem" ubuntu@<ip-privado>
+4. **Podemos verificar se o mount do EFS funcionou. Utilizando o comando `df -h`, vai retornar os discos do sistema e um deles terá o mesmo código fornecido pelo EFS, indicando assim que funcionou.**
