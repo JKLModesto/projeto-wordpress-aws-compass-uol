@@ -161,4 +161,6 @@ Para acessar as instâncias privadas via SSH, configuramos um Bastion Host em um
 3. **A partir do Bastion Host, acessar as instâncias privadas utilizando o comando:**
    ```bash
    ssh -i "mykeys.pem" ubuntu@<ip-privado>
+---
+   3.1. **Lembrando que mykeys.pem deve ser passado para o bastion host manualmente e aplica o comando `chmod 400 mykeys.pem` para apenas o proprietário ter acesso de leitura.**
 4. **Podemos verificar se o mount do EFS funcionou. Utilizando o comando `df -h`, vai retornar os discos do sistema e um deles terá o mesmo código fornecido pelo EFS, indicando assim que funcionou.**
