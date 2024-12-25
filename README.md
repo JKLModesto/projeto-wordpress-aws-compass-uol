@@ -1,4 +1,4 @@
-# Configuração de Ambiente AWS para WordPress
+# Ambiente Wordpress EC2-AWS
 
 ## Criação da VPC
 Na primeira etapa, foi necessário criar uma nova VPC para organizar os recursos.
