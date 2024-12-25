@@ -1,5 +1,9 @@
 # Ambiente Wordpress EC2-AWS
 
+## Arquitetura do projeto
+
+![Arquitetura do Projeto](imgs/arq.png "Arquitetura do Projeto")
+
 ## Sobre o Projeto
 Este projeto implementa um ambiente WordPress utilizando a infraestrutura da AWS. A configuração foi projetada para ser escalável, segura e funcional, abrangendo os seguintes pontos principais:
 
