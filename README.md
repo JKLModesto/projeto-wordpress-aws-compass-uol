@@ -59,9 +59,9 @@ Após criar a VPC, seguimos para a configuração dos Grupos de Segurança, que 
 
 **Nota:** É importante seguir a ordem correta na criação dos grupos de segurança para garantir a configuração adequada:
 
-1. Load Balancer: Deve ser criado primeiro, permitindo tráfego HTTP e HTTPS de qualquer IP.
-2. EC2: Crie em seguida, referenciando o grupo de segurança do Load Balancer como origem para HTTP e HTTPS.
-3. RDS e EFS: Crie por último, configurando suas origens com base no grupo de segurança do EC2, garantindo que somente as instâncias autorizadas possam acessar esses serviços.
+1. **Load Balancer:** Deve ser criado primeiro, permitindo tráfego HTTP e HTTPS de qualquer IP.
+2. **EC2:** Crie em seguida, referenciando o grupo de segurança do Load Balancer como origem para HTTP e HTTPS.
+3. **RDS e EFS:** Crie por último, configurando suas origens com base no grupo de segurança do EC2, garantindo que somente as instâncias autorizadas possam acessar esses serviços.
 
 ![Configuração do Grupo de segurança do LoadBalancer](imgs/loadbalancer-securitygroup.png "Configuração do Grupo de segurança do LoadBalancer")
 |:--|
@@ -79,19 +79,24 @@ Após criar a VPC, seguimos para a configuração dos Grupos de Segurança, que 
 
 ## Criação do RDS
 
+O RDS (Relational Database Service) é um serviço que simplifica a configuração, manutenção e escalabilidade de bancos de dados relacionais como MySQL e PostgreSQL. Utilizar grupos de sub-redes em sub-redes privadas é fundamental para aumentar a segurança, pois impede o acesso direto à internet, limitando conexões apenas a instâncias autorizadas. Por isso primeiramente criaremos o Grupo de sub-redes privadas.
+
 ### Criação do Grupo de Sub-redes Privadas
-1. **Acessar a seção de sub-redes na VPC:**
-   - No console da AWS, vá até o serviço VPC e acesse a aba "Grupos de sub-redes".
+1. **Acessar a seção de sub-redes no RDS:**
+   - No console da AWS, vá até o serviço RDS e acesse a aba "Grupos de sub-redes".
 2. **Criar um novo grupo de sub-redes:**
    - Clique em "Criar grupo de sub-redes".
 3. **Preencher as informações básicas:**
    - **Nome do grupo:** `private-subnet-group`
    - **Descrição:** "Grupo contendo sub-redes privadas da VPC"
    - **VPC:** Selecione a VPC previamente criada para o projeto.
-4. **Selecionar apenas sub-redes privadas.**
-5. **Salvar o grupo:** Clique em "Criar grupo".
+4. **Selecionar as zonas de disponibilidades.**
+5. **Selecionar apenas sub-redes privadas.**
+6. **Salvar o grupo:** Clique em "Criar grupo".
 
 ![Configuração do Grupo de sub-rede do RDS](imgs/grupo-subrede-rds.png "Configuração do Grupo de sub-rede do RDS")
+|:--|
+| Configuração do Grupo de sub-redes: Com essas configurações, você estará apto para seguir. |
 
 ### Configurações principais do RDS
 - **Tipo de banco de dados:** MySQL (Nível gratuito).
@@ -112,6 +117,12 @@ Após criar a VPC, seguimos para a configuração dos Grupos de Segurança, que 
 - **Escalabilidade automática do armazenamento:** Desmarcar.
 
 ![Configuração DB do RDS](imgs/criando-db-rds.png "Configuração DB do RDS")
+|:--|
+| IMPORTANTE: Se você não configurar essa parte, o script automatizado não funcionará. |
+
+## RDS pronto
+
+Com o RDS configurado e online, é possível obter o endereço IP do banco de dados. Esse IP deve ser copiado e inserido no arquivo `user_data.sh`, especificamente na seção do Docker Compose. No parâmetro `WORDPRESS_DB_HOST`, insira o IP do RDS. Além disso, preencha os valores de `WORDPRESS_DB_USER`, `WORDPRESS_DB_PASSWORD` e `WORDPRESS_DB_NAME`, assegurando que sejam consistentes com as informações configuradas anteriormente. Por padrão, o nome do banco já está definido como `wordpress`.
 
 ---
 
@@ -138,6 +149,8 @@ O EFS é um sistema de arquivos escalável e elástico que permite que várias i
    # Monta o sistema de arquivos da Amazon EFS
    sudo mount -t nfs4 -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport <id-amazon>:/ /mnt/efs
 
+---
+
 ## Criação das EC2
 Para este projeto, criamos duas instâncias EC2.
 
@@ -157,40 +170,6 @@ Inserir o script `user_data.sh` para inicializar as instâncias automaticamente.
 
 ---
 
-## Configuração do Load Balancer
-O Load Balancer distribui o tráfego de forma equilibrada entre as instâncias.
-
-### Configurações principais:
-- **Tipo:** Classic Load Balancer.
-- **Nome:** `MyLoadBalancer`.
-- **Mapeamento de rede:** Sub-redes públicas.
-- **Grupo de segurança:** `MyGroup-loadbalancer`.
-
-![Configuração da rede loadbalancer](imgs/loadbalancer-rede.png "Configuração da rede loadbalancer")
-
-### Verificação de integridade:
-- **Caminho de ping:** `/wp-admin/install.php` (espera-se retorno com status 200).
-
-### Integrar as instâncias:
-- **Clicar em ->** Adicionar instâncias.
-- Selecionar as duas instâncias que criamos anteriormente.
-
-Após configurado, o Load Balancer gera um DNS que pode ser utilizado para acessar o ambiente wordpress, indepedente da instância.
-
----
-
-## Configuração de Auto Scaling
-O Auto Scaling ajusta automaticamente o número de instâncias com base na demanda.
-
-### Passos principais:
-1. **Criar um modelo de execução (template):**
-   - **Tipo de instância:** `t2.micro`.
-   - **Tags e script User Data:** Iguais às instâncias EC2 criadas anteriormente.
-2. **Configurar as zonas de disponibilidade:** Sub-redes privadas.
-3. **Integrar ao Load Balancer existente.**
-
----
-
 ## Bastion Host
 Para acessar as instâncias privadas via SSH, configuramos um Bastion Host em uma sub-rede pública.
 
@@ -204,6 +183,55 @@ Para acessar as instâncias privadas via SSH, configuramos um Bastion Host em um
 3.1. **Lembrando que mykeys.pem deve ser passado para o bastion host manualmente e aplicar o comando `chmod 400 mykeys.pem` para apenas o proprietário ter acesso de leitura a chave.**
 
 4. **Podemos verificar se o mount do EFS funcionou. Utilizando o comando `df -h`, vai retornar os discos do sistema e um deles terá o mesmo código fornecido pelo EFS, indicando assim que funcionou.**
+
+![EFS Funcionando](imgs/efs-funcionando.png "EFS Funcionando")
+|:--|
+| Exemplo: Ao acessar e executar o comando `df -h` você deve ver algo como na imagem. |
+
+---
+
+## Configuração do Load Balancer
+O Load Balancer é uma ferramenta essencial para distribuir o tráfego de forma equilibrada entre as instâncias EC2, garantindo alta disponibilidade e desempenho do ambiente. Ele atua como um ponto único de entrada, redirecionando as solicitações de usuários para as instâncias ativas de maneira uniforme. Também permite escalabilidade, integrando-se com o Auto Scaling para ajustar dinamicamente a capacidade com base na demanda.
+
+### Configurações principais:
+- **Tipo:** Classic Load Balancer.
+- **Nome:** `MyLoadBalancer`.
+- **Mapeamento de rede:** Sub-redes públicas.
+- **Grupo de segurança:** `MyGroup-loadbalancer`.
+
+![Configuração da rede loadbalancer](imgs/loadbalancer-rede.png "Configuração da rede loadbalancer")
+|:--|
+| Pontos importantes: Selecionar as sub redes públicas e seu grupo de segurança. |
+
+### Verificação de integridade:
+- **Caminho de ping:** `/wp-admin/install.php` (espera-se retorno com status 200).
+
+### Integrar as instâncias:
+- **Clicar em ->** Adicionar instâncias.
+- Selecionar as duas instâncias que criamos privadas que criamos no tópico de EC2.
+
+Após configurado, o Load Balancer gera um DNS que pode ser utilizado para acessar o ambiente wordpress, indepedente da instância.
+
+---
+
+## Configuração de Auto Scaling
+O Auto Scaling é responsável por ajustar automaticamente o número de instâncias EC2 com base na demanda do tráfego ou nas métricas de desempenho definidas, como uso de CPU, memória ou número de conexões ativas. Ele permite que o ambiente seja dimensionado horizontalmente, adicionando instâncias durante picos de acesso para manter a performance, e removendo-as em períodos de baixa utilização para reduzir custos. Essa flexibilidade garante que o sistema se mantenha eficiente, resiliente e econômico, atendendo às necessidades dos usuários sem interrupções. Além disso, o Auto Scaling trabalha em conjunto com o Load Balancer para incluir ou excluir instâncias de maneira transparente, sem impactar o funcionamento do ambiente.
+
+### Passos principais:
+1. **Criar um modelo de execução (template):**
+   - **Tipo de instância:** `t2.micro`.
+   - **Tags e script User Data:** Iguais às instâncias EC2 criadas anteriormente.
+2. **Configurar as zonas de disponibilidade:** Sub-redes privadas.
+3. **Integrar ao Load Balancer existente.**
+4. O restante das configurações pode deixar default.
+
+##Conclusão
+
+Este projeto demonstrou a criação de um ambiente WordPress robusto e escalável, utilizando os principais recursos oferecidos pela AWS. Desde a configuração de uma VPC personalizada até a integração de serviços como RDS, EFS, EC2, Load Balancer e Auto Scaling, cada etapa foi planejada para garantir desempenho, segurança e alta disponibilidade.
+Este ambiente pode ser expandido ou adaptado para novos cenários, confirmando a versatilidade e a eficiência da arquitetura criada. Ele representa uma base sólida para futuros projetos, tanto para aprendizado quanto para uso em produção.
+Trabalhar neste projeto foi uma experiência nova, que impulsionou meu crescimento intelectual e me permitiu explorar novas tecnologias na prática, algo que antes só conhecia teoricamente. Apesar das dificuldades e erros ao longo do caminho, fui capaz de entender o funcionamento de diversos processos e aprimorar minhas habilidades em DevOps. Essa jornada me proporcionou um aprendizado significativo e me preparou para enfrentar desafios futuros com mais confiança e competência.
+
+---
 
 ## Agradecimento
 **Quero agradecer a instrutores e colegas que me ajduaram nessa jornada, mesmo com apenas um detalhe, sou grato por:**
