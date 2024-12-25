@@ -31,14 +31,15 @@ Na primeira etapa, foi necessário criar uma nova VPC para organizar os recursos
 - **Bloco CIDR IPv4:** `10.0.0.0/16`
 - **Número de Zonas de Disponibilidade (AZs):** 2
 - **Sub-redes:** 2 públicas e 2 privadas
-- **Gateway NAT:** Configurado nesta etapa.
+- **Gateway NAT:** Ativamos 1 por AZ, assim a própria aws configura nossas conexões internas.
 
 ### Sobre o Gateway NAT
 O Gateway NAT (Network Address Translation) permite que as instâncias em sub-redes privadas acessem a internet para realizar atualizações e outras tarefas, sem expor essas instâncias diretamente à internet.
 
 ![Configuração da VPC](imgs/criando-vpc.png "Configuração da VPC")
 |:--|
-| Figura 1: Legenda da imagem alinhada à esquerda. |
+| Configuração VPC: Todas as opções marcadas são necessarias para o funcionamento. |
+
 ---
 
 ## Grupos de Segurança
@@ -46,20 +47,33 @@ Após criar a VPC, seguimos para a configuração dos Grupos de Segurança, que 
 
 **Grupos criados:**
 1. **MyGroup-loadbalancer:**
-   - HTTP e HTTPS -> Qualquer IP
+   - HTTP e HTTPS -> Qualquer IPV4
 2. **MyGroup-ec2:**
    - HTTP -> Redireciona para o Load Balancer
    - SSH -> Qualquer IP
    - HTTPS -> Redireciona para o Load Balancer
 3. **MyGroup-rds:**
-   - MySQL -> Origem: MyGroup-ec2
+   - MySQL/Aurora -> Origem: MyGroup-ec2
 4. **MyGroup-efs:**
    - Tipo: NFS -> Origem: MyGroup-ec2
 
-**Nota:** É necessário criar o grupo de regras da EC2 antes de configurar o grupo do RDS, pois o RDS depende das regras da EC2 para definir a origem de conexão MySQL.
+**Nota:** É importante seguir a ordem correta na criação dos grupos de segurança para garantir a configuração adequada:
+
+1. Load Balancer: Deve ser criado primeiro, permitindo tráfego HTTP e HTTPS de qualquer IP.
+2. EC2: Crie em seguida, referenciando o grupo de segurança do Load Balancer como origem para HTTP e HTTPS.
+3. RDS e EFS: Crie por último, configurando suas origens com base no grupo de segurança do EC2, garantindo que somente as instâncias autorizadas possam acessar esses serviços.
+
+![Configuração do Grupo de segurança do LoadBalancer](imgs/loadbalancer-securitygroup.png "Configuração do Grupo de segurança do LoadBalancer")
+|:--|
+| Grupo de Segurança Load Balancer: Regras de entrada livres para qualquer ipv4. |
+
 ![Configuração do Grupo de segurança da EC2](imgs/grupo-ec2.png "Configuração do Grupo de segurança da EC2")
+|:--|
+| Grupo de Segurança EC2: As regras de entrada tendo como origem o grupo do load balancer. |
 
 ![Configuração do Grupo de segurança do RDS](imgs/grupo-rds.png "Configuração do Grupo de segurança do RDS")
+|:--|
+| Grupo de Segurança do RDS: As regras de entrada tendo como origem o EC2, mesma lógica para o EFS. |
 
 ---
 
