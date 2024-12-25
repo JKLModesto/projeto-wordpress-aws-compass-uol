@@ -1,9 +1,5 @@
 # Ambiente Wordpress EC2-AWS
 
-## Arquitetura do projeto
-
-![Arquitetura do Projeto](imgs/arq.png "Arquitetura do Projeto")
-
 ## Sobre o Projeto
 Este projeto implementa um ambiente WordPress utilizando a infraestrutura da AWS. A configuração foi projetada para ser escalável, segura e funcional, abrangendo os seguintes pontos principais:
 
@@ -14,6 +10,16 @@ Este projeto implementa um ambiente WordPress utilizando a infraestrutura da AWS
 - Load Balancer
 - Auto Scaling
 - Bastion Host
+
+## Arquitetura do projeto
+
+![Arquitetura do Projeto](imgs/arq.png "Arquitetura do Projeto")
+
+## Tecnologias Utilizadas
+- AWS Console
+- Shell Script
+- Linux
+- Docker
 
 ## Objetivo
 Implementar um ambiente WordPress confiável, seguro e escalável, utilizando práticas recomendadas para recursos da AWS.
@@ -31,7 +37,8 @@ Na primeira etapa, foi necessário criar uma nova VPC para organizar os recursos
 O Gateway NAT (Network Address Translation) permite que as instâncias em sub-redes privadas acessem a internet para realizar atualizações e outras tarefas, sem expor essas instâncias diretamente à internet.
 
 ![Configuração da VPC](imgs/criando-vpc.png "Configuração da VPC")
-
+|:--|
+| Figura 1: Legenda da imagem alinhada à esquerda. |
 ---
 
 ## Grupos de Segurança
