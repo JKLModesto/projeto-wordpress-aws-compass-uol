@@ -1,5 +1,19 @@
 # Ambiente Wordpress EC2-AWS
 
+## Sobre o Projeto
+Este projeto implementa um ambiente WordPress utilizando a infraestrutura da AWS. A configuração foi projetada para ser escalável, segura e funcional, abrangendo os seguintes pontos principais:
+
+- Criação de VPC
+- RDS (Banco de Dados MySQL)
+- EFS (Elastic File System)
+- Instâncias EC2
+- Load Balancer
+- Auto Scaling
+- Bastion Host
+
+## Objetivo
+Implementar um ambiente WordPress confiável, seguro e escalável, utilizando práticas recomendadas para recursos da AWS.
+
 ## Criação da VPC
 Na primeira etapa, foi necessário criar uma nova VPC para organizar os recursos.
 
