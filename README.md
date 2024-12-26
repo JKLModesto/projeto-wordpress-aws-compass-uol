@@ -225,7 +225,15 @@ O Auto Scaling é responsável por ajustar automaticamente o número de instânc
 3. **Integrar ao Load Balancer existente.**
 4. O restante das configurações pode deixar default.
 
+Após a conclusão da configuração do AutoScaling, será criada uma nova instância automaticamente. Isso indica que tudo ocorreu de forma correta.
+
 ## Conclusão
+
+Acessando pelo DNS do LoadBalancer:
+
+![Tela inicial do Wordpress](imgs/mywordpress.png "Tela inicial do Wordpress")
+|:--|
+| Tela Inicial: Aqui vemos a tela inicial de configuração do wordpress. |
 
 Este projeto demonstrou a criação de um ambiente WordPress robusto e escalável, utilizando os principais recursos oferecidos pela AWS. Desde a configuração de uma VPC personalizada até a integração de serviços como RDS, EFS, EC2, Load Balancer e Auto Scaling, cada etapa foi planejada para garantir desempenho, segurança e alta disponibilidade.
 Este ambiente pode ser expandido ou adaptado para novos cenários, confirmando a versatilidade e a eficiência da arquitetura criada. Ele representa uma base sólida para futuros projetos, tanto para aprendizado quanto para uso em produção.
